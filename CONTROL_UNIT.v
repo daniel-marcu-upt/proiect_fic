@@ -12,13 +12,47 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 `define FETCH 2'b00
 `define DECODE 2'b01
 `define WAIT 2'b10
+`define HLT_STATE 2'b11
 
+`define BRZ 5'b11001
+`define BRN 5'b11010
+`define BRC 5'b11011
+`define BRO 5'b11100
+`define BRA 5'b11000
 
-`define NOP 6'd0
-`define ADD 6'd1
-`define SUB 6'd2
-`define SHL 6'd3
-`define BRZ 6'd5
+//le poti lasa pe astea 4 momentan
+`define PUSH 5'b11000
+`define POP  5'b10001
+`define JMP  5'b10010 //sau CALL
+`define RET  5'b10011
+
+`define MOV 5'b01100
+//le poti lasa pe astea 2 momentan
+`define STR 5'b01101
+`define LDR 5'b01110
+
+//puteti lasa MUL, DIV, MOD momentan
+`define ADD 5'b00001 
+`define SUB 5'b00010 
+`define LSR 5'b00011 
+`define LSL 5'b00100 
+`define RSR 5'b00101 
+`define RSL 5'b00110 
+`define MOV 5'b00111 
+`define MUL 5'b01000 
+`define DIV 5'b01001 
+`define MOD 5'b01010 
+`define AND 5'b01011 
+`define OR  5'b01100 
+`define XOR 5'b01101 
+`define NOT 5'b01110 
+`define CMP 5'b01111 
+`define TST 5'b10000 
+`define INC 5'b10001 
+`define DEC 5'b10010 
+`define HLT 5'b00000 
+`define NOP 5'b11111 
+
 
 wire [15:0] acc1, acc2; //registru accumulator
 reg [15:0] A, B; //input ALU
@@ -58,12 +92,15 @@ always @(state) begin
 		state_next = `DECODE;
 	end else if(state == `DECODE) begin
 		state_next = `WAIT;
-		case(opcode)
+		case(opcode[5:1])
 		//TOOD tratam toate cazurile
 		//TODO tratam opcode
 		`ADD: begin
 			A=X;
-			B=Y;
+			if(opcode[0])
+				B=imm;
+			else
+				B=Y;
 			bgn = 1'b1;
 			state_next = `WAIT;
 		end

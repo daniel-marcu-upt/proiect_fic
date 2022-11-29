@@ -2,11 +2,25 @@
 `define INIT 8'd0
 `define WAIT 8'd1 
 
-
-`define NOP 6'd0
-`define ADD 6'd1
-`define SUB 6'd2
-`define SHL 6'd3
+`define ADD 5'b00001 
+`define SUB 5'b00010 
+`define LSR 5'b00011 
+`define LSL 5'b00100 
+`define RSR 5'b00101 
+`define RSL 5'b00110 
+`define MOV 5'b00111 
+`define MUL 5'b01000 
+`define DIV 5'b01001 
+`define MOD 5'b01010 
+`define AND 5'b01011 
+`define OR  5'b01100 
+`define XOR 5'b01101 
+`define NOT 5'b01110 
+`define CMP 5'b01111 
+`define TST 5'b10000 
+`define INC 5'b10001 
+`define DEC 5'b10010 
+`define NOP 5'b11111
 
 module ALU (input clk, 
 	input bgn,
@@ -71,7 +85,7 @@ module ALU_H (
 				X=A-B;
 				rdy=1'b1;
 			end
-			`SHL: begin
+			`LSL: begin
 				X=A<<B;
 				rdy=1'b1;
 			end
