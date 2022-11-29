@@ -14,24 +14,11 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 `define WAIT 2'b10
 `define HLT_STATE 2'b11
 
-`define BRZ 5'b11001
-`define BRN 5'b11010
-`define BRC 5'b11011
-`define BRO 5'b11100
-`define BRA 5'b11000
-
-//le poti lasa pe astea 4 momentan
-`define PUSH 5'b11000
-`define POP  5'b10001
-`define JMP  5'b10010 //sau CALL
-`define RET  5'b10011
-
-`define MOV 5'b01100
-//le poti lasa pe astea 2 momentan
-`define STR 5'b01101
-`define LDR 5'b01110
-
+	
 //puteti lasa MUL, DIV, MOD momentan
+	
+`define HLT 5'b00000 
+	
 `define ADD 5'b00001 
 `define SUB 5'b00010 
 `define LSR 5'b00011 
@@ -49,8 +36,26 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 `define TST 5'b01111 
 `define INC 5'b10000 
 `define DEC 5'b10001 
-`define HLT 5'b00000 
+	
+`define MOV 5'b10010
+//le poti lasa pe astea 2 momentan
+`define STR 5'b10011
+`define LDR 5'b10100
+	
+`define BRZ 5'b10101
+`define BRN 5'b10110
+`define BRC 5'b10111
+`define BRO 5'b11000
+`define BRA 5'b11001
+
+//le poti lasa pe astea 4 momentan
+`define PUSH 5'b11010
+`define POP  5'b11011
+`define JMP  5'b11100 //sau CALL
+`define RET  5'b11101
+	
 `define NOP 5'b11111 
+
 
 
 wire [15:0] acc1, acc2; //registru accumulator
