@@ -8,19 +8,19 @@
 `define LSL 5'b00100 
 `define RSR 5'b00101 
 `define RSL 5'b00110 
-`define MOV 5'b00111 
-`define MUL 5'b01000 
-`define DIV 5'b01001 
-`define MOD 5'b01010 
-`define AND 5'b01011 
-`define OR  5'b01100 
-`define XOR 5'b01101 
-`define NOT 5'b01110 
-`define CMP 5'b01111 
-`define TST 5'b10000 
-`define INC 5'b10001 
-`define DEC 5'b10010 
-`define NOP 5'b11111
+`define MUL 5'b00111 
+`define DIV 5'b01000 
+`define MOD 5'b01001 
+`define AND 5'b01010 
+`define OR  5'b01011 
+`define XOR 5'b01100 
+`define NOT 5'b01101 
+`define CMP 5'b01110 
+`define TST 5'b01111 
+`define INC 5'b10000 
+`define DEC 5'b10001 
+`define HLT 5'b00000 
+`define NOP 5'b11111 
 
 module ALU (input clk, 
 	input bgn,
