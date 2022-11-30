@@ -53,6 +53,13 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 `define POP  5'b11011
 `define JMP  5'b11100 //sau CALL
 `define RET  5'b11101
+
+//instructiune pentru INPUT/OUTPUT
+//INP -> 111100
+//OUT -> 111101
+//sintaxa: OUT X/Y, 1/2/3 (dec/hex/bin)
+//pentru OUT e simplu, facem un $display("%d/h/b", X/Y);
+`define SER 5'b11110
 	
 `define NOP 5'b11111 
 
