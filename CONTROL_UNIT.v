@@ -123,6 +123,8 @@ always @(state) begin
 	end else if(state == `WAIT) begin //stare pentru ALU
 		state_next = `WAIT;
 		if(rdy) begin
+			//TODO salvare valori din alu in registrii
+			//adica X/Y=acc1/acc2, in functie de opcode
 			bgn = 1'b0;
 			state_next = `FETCH;
 			PC = PC + 1;
