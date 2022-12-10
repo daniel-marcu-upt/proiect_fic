@@ -27,12 +27,12 @@ module tb;
 	initial begin
 		clk=0;
 		rst=1;
-		#100;
+		#2;
 		rst=0;
 	end
 	initial
 		forever begin
-			#50;
+			#1;
 			clk=~clk;
 		end
 	
