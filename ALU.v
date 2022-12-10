@@ -21,131 +21,131 @@
 `define NOP 5'b11111
 
 module ALU (
-			input clk, 
-			input bgn,
-			input [5:0] opcode,
-			input [15:0] A, B,
-			output reg [15:0] acc1, acc2,
-			output zero, negative, carry, overflow,
-			output reg rdy
-	);
-	reg [7:0] state, state_next;
-	reg [5:0] op;
-	reg [15:0] a, b;
-	
-	ALU_H al(op, a, b, X, Y, zero, negative, carry, overflow, r);
-	
-	always @(posedge clk) begin
-		state <= state_next;
-	end
-	
-	always @(state, opcode) begin
-		if(state == `INIT) begin
-			if(bgn) begin
-				rdy = 1'b0;
-				a=A;
-				b=B;
-				op=opcode;
-				state_next = `WAIT;
-			end
-		end else if(state == `WAIT) begin
-			if(r) begin
-				acc1=X;
-				acc2=Y;
-				state_next = `INIT;
-				rdy = 1'b1;
-				op=0;
-			end
-		end	
-	end
+            input clk, 
+            input bgn,
+            input [5:0] opcode,
+            input [15:0] A, B,
+            output reg [15:0] acc1, acc2,
+            output zero, negative, carry, overflow,
+            output reg rdy
+    );
+    reg [7:0] state, state_next;
+    reg [5:0] op;
+    reg [15:0] a, b;
+    
+    ALU_H al(op, a, b, X, Y, zero, negative, carry, overflow, r);
+    
+    always @(posedge clk) begin
+        state <= state_next;
+    end
+    
+    always @(state, opcode) begin
+        if(state == `INIT) begin
+            if(bgn) begin
+                rdy = 1'b0;
+                a=A;
+                b=B;
+                op=opcode;
+                state_next = `WAIT;
+            end
+        end else if(state == `WAIT) begin
+            if(r) begin
+                acc1=X;
+                acc2=Y;
+                state_next = `INIT;
+                rdy = 1'b1;
+                op=0;
+            end
+        end
+    end
 
 endmodule
 
 module ALU_H (
-			input [5:0] opcode,
-			input [15:0] A, B,
-			output reg [15:0] X, Y,
-			output zero, negative, carry, overflow,
-			output reg rdy
-	);
-	reg[15:0] i;
-	always @(opcode) begin
-		rdy=0;
-		case (opcode)
-			`ADD: begin 
-				X=A+B;
-				rdy=1'b1;
-			end
-			`SUB: begin 
-				X=A-B;
-				rdy=1'b1;
-			end
-			`LSR: begin
-				X=A>>B;
-				rdy=1'b1;
-			end
-			`LSL: begin
-				X=A<<B;
-				rdy=1'b1;
-			end
-			`RSR: begin
-			    if(i == 0) begin
-					i=B;
-					X=A;
-				end else begin
-					X={X[0],X[15:1]};
-					i=i-1;
-				end
-				if(i == 0)
-					rdy=1'b1;
-			end
-			`RSL: begin
-			    if(i == 0) begin
-					i=B;
-					X=A;
-				end else begin
-					X={X[14:0],X[15]};
-					i=i-1;
-				end
-				if(i == 0)
-					rdy=1'b1;
-			end
-			`AND: begin
-				X=A&B;
-				rdy=1'b1;
-			end
-			`OR: begin
-				X=A|B;
-				rdy=1'b1;
-			end
-			`XOR: begin
-				X=A^B;
-				rdy=1'b1;
-			end
-			`NOT: begin
-				X=~A;
-				rdy=1'b1;
-			end
-			`CMP: rdy=1'b1;
-			`TST: begin
-				X=A&B;
-				rdy=1'b1;
-			end
-			`INC: begin
-				X=A+1;
-				rdy=1'b1;
-			end
-			`DEC: begin
-				X=A-1;
-				rdy=1'b1;
-			end
-			`NOP: rdy=1'b1;
-		endcase
-	end
+            input [5:0] opcode,
+            input [15:0] A, B,
+            output reg [15:0] X, Y,
+            output zero, negative, carry, overflow,
+            output reg rdy
+    );
+    reg[15:0] i;
+    always @(opcode) begin
+        rdy=0;
+        case (opcode)
+            `ADD: begin 
+                X=A+B;
+                rdy=1'b1;
+            end
+            `SUB: begin 
+                X=A-B;
+                rdy=1'b1;
+            end
+            `LSR: begin
+                X=A>>B;
+                rdy=1'b1;
+            end
+            `LSL: begin
+                X=A<<B;
+                rdy=1'b1;
+            end
+            `RSR: begin
+                if(i == 0) begin
+                    i=B;
+                    X=A;
+                end else begin
+                    X={X[0],X[15:1]};
+                    i=i-1;
+                end
+                if(i == 0)
+                    rdy=1'b1;
+            end
+            `RSL: begin
+                if(i == 0) begin
+                    i=B;
+                    X=A;
+                end else begin
+                    X={X[14:0],X[15]};
+                    i=i-1;
+                end
+                if(i == 0)
+                    rdy=1'b1;
+            end
+            `AND: begin
+                X=A&B;
+                rdy=1'b1;
+            end
+            `OR: begin
+                X=A|B;
+                rdy=1'b1;
+            end
+            `XOR: begin
+                X=A^B;
+                rdy=1'b1;
+            end
+            `NOT: begin
+                X=~A;
+                rdy=1'b1;
+            end
+            `CMP: rdy=1'b1;
+            `TST: begin
+                X=A&B;
+                rdy=1'b1;
+            end
+            `INC: begin
+                X=A+1;
+                rdy=1'b1;
+            end
+            `DEC: begin
+                X=A-1;
+                rdy=1'b1;
+            end
+            `NOP: rdy=1'b1;
+        endcase
+    end
 
-	assign carry=(A < B);
-	assign overflow=(B < A);
-	assign zero=(X == 0) & (Y == 0);
-	assign negative=(X[15] & (Y == 0)) | (Y[15]);
+    assign carry=(A < B);
+    assign overflow=(B < A);
+    assign zero=(X == 0) & (Y == 0);
+    assign negative=(X[15] & (Y == 0)) | (Y[15]);
 
 endmodule
