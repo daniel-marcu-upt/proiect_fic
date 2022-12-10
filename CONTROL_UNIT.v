@@ -9,10 +9,11 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 	output reg [15:0] ram_out
 );
 
-`define FETCH 2'b00
-`define DECODE 2'b01
-`define WAIT 2'b10
-`define HLT_STATE 2'b11
+`define INIT 3'b000
+`define FETCH 3'b001
+`define DECODE 3'b010
+`define WAIT 3'b011
+`define HLT_STATE 3'b100
 
 	
 //puteti lasa MUL, DIV, MOD momentan
@@ -87,31 +88,50 @@ assign br_address = instr[9:0]; // adresa de jump
 
 assign rom_address = PC;
 
-ALU alu(clk, bgn, opcode, A, B, acc1, acc2, zero, negative, carry, overflow, rdy);
+ALU alu(clk, rst, bgn, opcode, A, B, acc1, acc2, zero, negative, carry, overflow, rdy);
 
 reg [2:0] state, state_next;
 
 always @(posedge clk) begin
-	if(rst) begin
-		state <= `FETCH;
-	end else
+	if(rst)
+		state <= `INIT;
+	else
 		state <= state_next;
 end
 
-always @(state) begin
-	if(state == `FETCH)begin
+always @(state, rdy) begin
+	if(state == `INIT)begin
+		state_next = `FETCH;
+		PC=0;
+		X=0;
+		Y=0;
+		SP=(2**RAM_SIZE)-1;
+		A=0;
+		B=0;
+		bgn=0;
+		ram_address=0;
+		we=0;
+		ram_out=0;
+	end else if(state == `FETCH)begin
 		state_next = `DECODE;
 	end else if(state == `DECODE) begin
 		state_next = `WAIT;
+		bgn = 1'b0;
 		case(opcode[5:1])
 		//TOOD tratam toate cazurile
 		//TODO tratam opcode
 		`ADD, `SUB, `LSR, `LSL, `RSR, `RSL, `MUL, `DIV, `MOD, `AND, `OR, `XOR, `NOT, `CMP, `TST, `INC, `DEC, `LDR: begin
-			A=X;
-			if(opcode[0])
+			if(r)
+				A=Y;
+			else
+				A=X;
+			if(~opcode[0])
 				B=imm;
 			else
-				B=Y;
+				if(imm)
+					B=Y;
+				else
+					B=X;
 			bgn = 1'b1;
 			state_next = `WAIT;
 		end
@@ -128,6 +148,7 @@ always @(state) begin
 					X=imm;
 			bgn = 1'b0;
 			state_next = `FETCH;
+			PC=PC+1;
 		end
 		`STR: begin
 			if(opcode[0])
@@ -143,6 +164,7 @@ always @(state) begin
 					ram_out=X;
 			bgn = 1'b0;
 			state_next = `FETCH;
+			PC=PC+1;
 		end
 		`NOP: begin
 			bgn = 1'b1;
@@ -152,22 +174,23 @@ always @(state) begin
 			if(opcode[0])begin
 				if(r)begin
 					if(imm==1)
-						$display("%d", Y);
+						$display("Y=%d", Y);
 					else if(imm==2)
-						$display("%h", Y);
+						$display("Y=%h", Y);
 					else if(imm==3)
-						$display("%b", Y);
+						$display("Y=%b", Y);
 				end else begin
 					if(imm==1)
-						$display("%d", X);
+						$display("X=%d", X);
 					else if(imm==2)
-						$display("%h", X);
+						$display("X=%h", X);
 					else if(imm==3)
-						$display("%b", X);
+						$display("X=%b", X);
 				end
 			end
-			bgn = 1'b1;
-			state_next = `WAIT;
+			bgn = 1'b0;
+			state_next = `FETCH;
+			PC=PC+1;
 		end
 		`BRZ: begin
 			if(zero) begin
@@ -212,7 +235,7 @@ always @(state) begin
 		`HLT: begin
 				state_next = `HLT_STATE;
 		end
-		default: X=X;
+		default: state_next = `HLT_STATE;
 		//daca avem ALU, facem state_next = `WAIT, altfel `FETCH
 		endcase
 	end else if(state == `WAIT) begin //stare pentru ALU
@@ -221,9 +244,9 @@ always @(state) begin
 			case(opcode[5:1])
 			`ADD, `SUB, `LSR, `LSL, `RSR, `RSL, `MOD, `AND, `OR, `XOR, `NOT, `CMP, `TST, `INC, `DEC, `MUL, `DIV: begin
 			if(r)
-			Y=accc1;
+				Y=acc1;
 			else 
-			X=acc1;
+				X=acc1;
 			end
 			// `LDR: begin
 			// //implement LDR
@@ -236,8 +259,8 @@ always @(state) begin
 			PC = PC + 1;
 		end
 	end
-	else if(state == `HLT_STATE)
-		state = `HLT_STATE;
+	else
+		state_next = `HLT_STATE;
 end
 
 endmodule

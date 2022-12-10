@@ -1,22 +1,22 @@
 module ROM #(parameter N=16)(
 	input clk, rst,
-	input [15:0] address,
+	input [N-1:0] address,
 	output reg [15:0] data
 );
-	reg [15:0] rom [(2**N)-1:0];
+	reg [15:0] rom [0:(2**N)-1];
 	
    initial begin
-      //$readmemh("instructions.mem", rom, 0, (2**N)-1);
+	      $readmemh("C:\\Users\\d\\Documents\\poli\\proiect_fic\\instructions.mem", rom);
+
 	end
 		
 
    always @(posedge clk) begin
 		if(rst) begin
-			//$readmemh("instructions.mem", rom, 0, (2**N)-1);
+			data <= rom[0];
 		end else
 			data <= rom[address];
 	end
 		
 		
-
 endmodule

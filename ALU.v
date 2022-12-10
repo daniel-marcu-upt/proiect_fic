@@ -1,5 +1,6 @@
 `define INIT 8'd0
-`define WAIT 8'd1 
+`define LOAD 8'd1
+`define WAIT 8'd2 
 
 `define ADD 5'b00001
 `define SUB 5'b00010
@@ -21,7 +22,8 @@
 `define NOP 5'b11111
 
 module ALU (
-            input clk, 
+            input clk,
+				input rst,
             input bgn,
             input [5:0] opcode,
             input [15:0] A, B,
@@ -32,16 +34,31 @@ module ALU (
     reg [7:0] state, state_next;
     reg [5:0] op;
     reg [15:0] a, b;
+	 wire [15:0] x, y;
     
-    ALU_H al(op, a, b, X, Y, zero, negative, carry, overflow, r);
+    ALU_H al(op, a, b, x, y, zero, negative, carry, overflow, r);
     
     always @(posedge clk) begin
-        state <= state_next;
+		 if(rst)begin 
+			state <= `INIT;
+		 end else begin
+         state <= state_next;
+	    end
     end
     
-    always @(state, opcode) begin
-        if(state == `INIT) begin
+    always @(state, opcode, bgn, r) begin
+		  if(state == `INIT)begin
+				op=0;
+				a=0;
+				b=0;
+				acc1=0;
+				acc2=0;
+				rdy=0;
+				state_next = `LOAD;
+        end else if(state == `LOAD) begin
             if(bgn) begin
+					 acc1=0;
+					 acc2=0;
                 rdy = 1'b0;
                 a=A;
                 b=B;
@@ -50,11 +67,11 @@ module ALU (
             end
         end else if(state == `WAIT) begin
             if(r) begin
-                acc1=X;
-                acc2=Y;
-                state_next = `INIT;
+                acc1=x;
+                acc2=y;
+                state_next = `LOAD;
                 rdy = 1'b1;
-                op=0;
+                op={`NOP, 1'b0};
             end
         end
     end
@@ -71,7 +88,7 @@ module ALU_H (
     reg[15:0] i;
     always @(opcode) begin
         rdy=0;
-        case (opcode)
+        case (opcode[5:1])
             `ADD: begin 
                 X=A+B;
                 rdy=1'b1;

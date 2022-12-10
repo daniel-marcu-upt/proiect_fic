@@ -2,6 +2,8 @@
 db/
 output_files/
 incremental_db/
+.qsys_edit/
+simulation/
 *.rpt
 *.done
 *.smsg
