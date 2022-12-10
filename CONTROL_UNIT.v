@@ -6,7 +6,7 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 	output reg [RAM_SIZE-1:0] ram_address,
 	output reg we,
 	input [15:0] ram_in,
-	output [15:0] ram_out
+	output reg [15:0] ram_out
 );
 
 `define FETCH 2'b00
@@ -106,12 +106,66 @@ always @(state) begin
 		case(opcode[5:1])
 		//TOOD tratam toate cazurile
 		//TODO tratam opcode
-		`ADD: begin
+		`ADD, `SUB, `LSR, `LSL, `RSR, `RSL, `MUL, `DIV, `MOD, `AND, `OR, `XOR, `NOT, `CMP, `TST, `INC, `DEC, `LDR: begin
 			A=X;
 			if(opcode[0])
 				B=imm;
 			else
 				B=Y;
+			bgn = 1'b1;
+			state_next = `WAIT;
+		end
+		`MOV: begin 
+			if(opcode[0])
+				if(r)
+					Y=X;
+				else 
+					X=Y;
+			else
+				if(r)
+					Y=imm;
+				else
+					X=imm;
+			bgn = 1'b0;
+			state_next = `FETCH;
+		end
+		`STR: begin
+			if(opcode[0])
+				if(imm)
+					ram_address=Y;
+				else 
+					ram_address=X;
+			else
+				ram_address=imm;
+				if(r)
+					ram_out=Y;
+				else
+					ram_out=X;
+			bgn = 1'b0;
+			state_next = `FETCH;
+		end
+		`NOP: begin
+			bgn = 1'b1;
+			state_next = `WAIT;
+		end
+		`SER: begin
+			if(opcode[0])begin
+				if(r)begin
+					if(imm==1)
+						$display("%d", Y);
+					else if(imm==2)
+						$display("%h", Y);
+					else if(imm==3)
+						$display("%b", Y);
+				end else begin
+					if(imm==1)
+						$display("%d", X);
+					else if(imm==2)
+						$display("%h", X);
+					else if(imm==3)
+						$display("%b", X);
+				end
+			end
 			bgn = 1'b1;
 			state_next = `WAIT;
 		end
@@ -124,12 +178,57 @@ always @(state) begin
 				state_next = `FETCH;
 			end
 		end
+		`BRN: begin
+			if(negative) begin
+				PC = br_address;
+				state_next = `FETCH;
+			end else begin
+				PC = PC + 1;
+				state_next = `FETCH;
+			end
+		end
+		`BRC: begin
+			if(carry) begin
+				PC = br_address;
+				state_next = `FETCH;
+			end else begin
+				PC = PC + 1;
+				state_next = `FETCH;
+			end
+		end
+		`BRO: begin
+			if(overflow) begin
+				PC = br_address;
+				state_next = `FETCH;
+			end else begin
+				PC = PC + 1;
+				state_next = `FETCH;
+			end
+		end
+		`BRA: begin
+				PC = br_address;
+				state_next = `FETCH;
+		end
+		`HLT: begin
+				state_next = `HLT_STATE;
+		end
 		default: X=X;
 		//daca avem ALU, facem state_next = `WAIT, altfel `FETCH
 		endcase
 	end else if(state == `WAIT) begin //stare pentru ALU
 		state_next = `WAIT;
 		if(rdy) begin
+			case(opcode[5:1])
+			`ADD, `SUB, `LSR, `LSL, `RSR, `RSL, `MOD, `AND, `OR, `XOR, `NOT, `CMP, `TST, `INC, `DEC, `MUL, `DIV: begin
+			if(r)
+			Y=accc1;
+			else 
+			X=acc1;
+			end
+			// `LDR: begin
+			// //implement LDR
+			// end
+			endcase
 			//TODO salvare valori din alu in registrii
 			//adica X/Y=acc1/acc2, in functie de opcode
 			bgn = 1'b0;
@@ -137,6 +236,8 @@ always @(state) begin
 			PC = PC + 1;
 		end
 	end
+	else if(state == `HLT_STATE)
+		state = `HLT_STATE;
 end
 
 endmodule
