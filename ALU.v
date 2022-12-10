@@ -1,4 +1,3 @@
-
 `define INIT 8'd0
 `define WAIT 8'd1 
 
@@ -71,7 +70,7 @@ module ALU_H (
 	output zero, negative, carry, overflow,
 	output reg rdy
 );
-
+	reg[15:0] i;
 	always @(opcode) begin
 		rdy=0;
 		case (opcode)
@@ -89,12 +88,69 @@ module ALU_H (
 				X=A<<B;
 				rdy=1'b1;
 			end
+			`LSR: begin
+				X=A>>B;
+				rdy=1'b1;
+			end
+			`RSR: begin
+			    if( i == 0)begin
+				  i = B;
+				  X = A;
+				 end
+				 else begin
+				  i= i-1;
+				  X={X[0],X[15:1]};
+				 end
+				 if( i ==0)
+				  rdy=1'b1;
+			end
+			`RSL: begin
+			    if( i == 0)begin
+				  i = B;
+				  X = A;
+				 end
+				 else begin
+				  i= i-1;
+				  X={X[14:0],X[15]};
+				 end
+				 if( i ==0)
+				  rdy=1'b1;
+			end
+			`AND: begin
+			   X= A&B;
+				rdy=1'b1;
+			end
+			`OR: begin
+			   X= A|B;
+				rdy=1'b1;
+			end
+			`XOR: begin
+			   X= A^B;
+				rdy=1'b1;
+			end
+			`NOT: begin
+			   X=~A;
+				rdy=1'b1;
+			end
+			`CMP: rdy=1'b1;
+			`TST: begin
+			   X= A&B;
+				rdy=1'b1;
+			end
+			`INC: begin
+			   X = A+1;
+				rdy=1'b1;
+			end
+			`DEC: begin
+			   X = A-1;
+				rdy=1'b1;
+			end
 		endcase
 	end
 
 assign carry=(A<B);
 assign overflow=(B<A);
 assign zero = (X==0) & (Y==0);
-assign negative = (X[7] & (Y==0)) | (Y[7]);
+assign negative = (X[15] & (Y==0)) | (Y[15]);
 
 endmodule
