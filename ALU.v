@@ -126,7 +126,10 @@ module ALU_H (
                 X=~A;
                 rdy=1'b1;
             end
-            `CMP: rdy=1'b1;
+            `CMP: begin
+                X=A-B;
+                rdy=1'b1;
+            end
             `TST: begin
                 X=A&B;
                 rdy=1'b1;
