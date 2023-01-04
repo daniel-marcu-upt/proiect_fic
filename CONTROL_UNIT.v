@@ -166,6 +166,17 @@ always @(state, rdy) begin
 			state_next = `FETCH;
 			PC=PC+1;
 		end
+		`LDR: begin
+			if(opcode[0])
+				if(imm)
+					ram_address=Y;
+				else 
+					ram_address=X;
+			else
+				ram_address=imm;
+			bgn = 1'b0;
+			state_next = `WAIT;
+		end
 		`NOP: begin
 			bgn = 1'b1;
 			state_next = `WAIT;
@@ -240,6 +251,14 @@ always @(state, rdy) begin
 		endcase
 	end else if(state == `WAIT) begin //stare pentru ALU
 		state_next = `WAIT;
+		if(opcode[5:1] == `LDR) begin
+			if(r)
+				Y=ram_in;
+			else
+				X=ram_in;
+			state_next = `FETCH;
+			PC = PC+1;
+		end
 		if(rdy) begin
 			case(opcode[5:1])
 			`ADD, `SUB, `LSR, `LSL, `RSR, `RSL, `MOD, `AND, `OR, `XOR, `NOT, `CMP, `TST, `INC, `DEC, `MUL, `DIV: begin
@@ -248,12 +267,8 @@ always @(state, rdy) begin
 			else 
 				X=acc1;
 			end
-			// `LDR: begin
-			// //implement LDR
-			// end
+			
 			endcase
-			//TODO salvare valori din alu in registrii
-			//adica X/Y=acc1/acc2, in functie de opcode
 			bgn = 1'b0;
 			state_next = `FETCH;
 			PC = PC + 1;
