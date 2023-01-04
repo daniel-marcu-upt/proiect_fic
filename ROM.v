@@ -6,7 +6,7 @@ module ROM #(parameter N=16)(
 	reg [15:0] rom [0:(2**N)-1];
 	
    initial begin
-	      $readmemh("C:\\Users\\d\\Documents\\poli\\proiect_fic\\instructions.mem", rom);
+	      $readmemh("C:\\Users\\marcu\\Documents\\fic\\instructions.mem", rom);
 
 	end
 		

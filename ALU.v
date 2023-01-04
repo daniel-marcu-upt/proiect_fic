@@ -98,17 +98,17 @@ module ALU_H (
                 rdy=1'b1;
             end
             `MUL: begin 
-		{Y, X}=A*B;
+		            {Y, X}=A*B;
                 rdy=1'b1;
             end
             `DIV: begin 
                 X=A/B;
-		Y=A%B;
+		            Y=A%B;
                 rdy=1'b1;
             end
             `MOD: begin 
                 Y=A/B;
-		X=A%B;
+		            X=A%B;
                 rdy=1'b1;
             end
             `LSR: begin

@@ -1,0 +1,5 @@
+MOV X, 10
+JMP function
+HLT
+function: OUT X, 1
+RET
