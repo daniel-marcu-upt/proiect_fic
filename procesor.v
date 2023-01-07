@@ -1,4 +1,4 @@
-module procesor #(parameter RAM_SIZE=2, parameter ROM_SIZE=8)(
+module procesor #(parameter RAM_SIZE=8, parameter ROM_SIZE=8)(
 	input clk, rst,
 	input [15:0] data_in,
 	output [15:0] data_out,

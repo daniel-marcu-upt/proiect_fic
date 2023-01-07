@@ -319,7 +319,7 @@ always @(state, rdy) begin
 			PC = PC+1;
 		end
 		if(opcode[5:1] == `RET) begin
-		  PC = ram_out+1;
+		  PC = ram_in+1;
 		  state_next = `FETCH;  
 		end
 		if(rdy) begin
