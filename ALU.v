@@ -85,7 +85,7 @@ module ALU_H (
             output zero, negative, carry, overflow,
             output reg rdy
     );
-    reg[15:0] i;
+    integer i;
     always @(opcode) begin
         rdy=0;
         case (opcode[5:1])
@@ -120,26 +120,24 @@ module ALU_H (
                 rdy=1'b1;
             end
             `RSR: begin
-                if(i == 0) begin
-                    i=B;
-                    X=A;
-                end else begin
+					X=A;
+					for(i=0; i<16;i=i+1)begin
+						if(i<B)
                     X={X[0],X[15:1]};
-                    i=i-1;
-                end
-                if(i == 0)
-                    rdy=1'b1;
+						else
+							X=X;
+					end
+               rdy=1'b1;
             end
             `RSL: begin
-                if(i == 0) begin
-                    i=B;
-                    X=A;
-                end else begin
+					X=A;
+					for(i=0; i<16;i=i+1)begin
+						if(i<B)
                     X={X[14:0],X[15]};
-                    i=i-1;
-                end
-                if(i == 0)
-                    rdy=1'b1;
+						else
+							X=X;
+					end                    
+               rdy=1'b1;
             end
             `AND: begin
                 X=A&B;
