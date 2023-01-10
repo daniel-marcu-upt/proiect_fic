@@ -4,6 +4,10 @@ output_files/
 incremental_db/
 .qsys_edit/
 simulation/
+work/
+*.mti
+*.mpf
+*.wlf
 *.rpt
 *.done
 *.smsg

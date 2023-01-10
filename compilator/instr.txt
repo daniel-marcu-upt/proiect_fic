@@ -1,0 +1,8 @@
+PSH 5
+POP X
+MOV Y, 6
+ADD X, Y
+JMP afisare
+RET
+afisare: OUT X, 1
+RET

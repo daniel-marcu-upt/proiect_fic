@@ -6,7 +6,8 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 	output reg [RAM_SIZE-1:0] ram_address,
 	output reg we,
 	input [15:0] ram_in,
-	output reg [15:0] ram_out
+	output reg [15:0] ram_out,
+	output reg fault
 );
 
 `define INIT 3'b000
@@ -15,8 +16,6 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 `define WAIT 3'b011
 `define HLT_STATE 3'b100
 
-	
-//puteti lasa MUL, DIV, MOD momentan
 	
 `define HLT 5'b00000 
 	
@@ -39,7 +38,6 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 `define DEC 5'b10001 
 	
 `define MOV 5'b10010
-//le poti lasa pe astea 2 momentan
 `define STR 5'b10011
 `define LDR 5'b10100
 	
@@ -49,7 +47,6 @@ module CONTROL_UNIT #(parameter RAM_SIZE=16, parameter ROM_SIZE=16)
 `define BRO 5'b11000
 `define BRA 5'b11001
 
-//le poti lasa pe astea 4 momentan
 `define PUSH 5'b11010
 `define POP  5'b11011
 `define JMP  5'b11100 //sau CALL
@@ -74,7 +71,7 @@ reg bgn;
 
 reg [15:0] X, Y; //registrii general use
 reg [15:0] PC; // PC ia din ROM
-reg [15:0] SP; // SP ia din RAM
+reg [16:0] SP; // SP ia din RAM
 
 wire [5:0] opcode; //opcode
 wire r;
@@ -105,14 +102,16 @@ always @(state, rdy) begin
 		PC=0;
 		X=0;
 		Y=0;
-		SP=(2**RAM_SIZE)-1;
+		SP=(2**RAM_SIZE);
 		A=0;
 		B=0;
 		bgn=0;
 		ram_address=0;
 		we=0;
 		ram_out=0;
+		fault=1'b0;
 	end else if(state == `FETCH)begin
+	  we=0;
 		state_next = `DECODE;
 	end else if(state == `DECODE) begin
 		state_next = `WAIT;
@@ -164,6 +163,7 @@ always @(state, rdy) begin
 					ram_out=X;
 			bgn = 1'b0;
 			state_next = `FETCH;
+			we=1;
 			PC=PC+1;
 		end
 		`LDR: begin
@@ -177,6 +177,65 @@ always @(state, rdy) begin
 			bgn = 1'b0;
 			state_next = `WAIT;
 		end
+		`PUSH: begin
+		  if(SP != 0) begin
+		    SP = SP - 1;
+		    ram_address = SP;
+		    if(opcode[0]) begin
+		      if(r)
+		         ram_out = Y;
+		       else
+		         ram_out = X;
+		    end else begin
+		        ram_out = imm;
+		    end
+		    PC = PC+1;
+		    we=1;
+		    state_next = `FETCH;
+		  end else begin
+		    state_next = `HLT_STATE;
+		    fault = 1'b1;
+		  end
+		 end
+		`JMP: begin
+		  if(SP != 0) begin
+		    SP = SP - 1;
+		    ram_address = SP;
+		    ram_out = PC;
+		    state_next = `FETCH;
+		    if(opcode[0])
+		      if(r)
+		        PC = Y;
+		      else
+		        PC = X;
+		    else
+		      PC = imm;
+		    we=1;
+		  end else begin
+		    state_next = `HLT_STATE;
+		    fault = 1'b1;
+		  end
+		end
+		`POP: begin
+		   if(SP != (2**RAM_SIZE)) begin
+		     ram_address = SP;
+		     SP = SP + 1;
+		     state_next = `WAIT;
+		   end else begin
+		     state_next = `HLT_STATE;
+		     fault = 1'b1;
+		   end
+		 end
+		`RET: begin
+		  if(SP != (2**RAM_SIZE)) begin
+		    ram_address = SP;
+		    SP = SP + 1;
+		    state_next = `WAIT;
+		  end else begin
+		    state_next = `HLT_STATE;
+		    fault = 1'b1;
+		  end
+		 end
 		`NOP: begin
 			bgn = 1'b1;
 			state_next = `WAIT;
@@ -251,13 +310,17 @@ always @(state, rdy) begin
 		endcase
 	end else if(state == `WAIT) begin //stare pentru ALU
 		state_next = `WAIT;
-		if(opcode[5:1] == `LDR) begin
+		if(opcode[5:1] == `LDR | opcode[5:1] == `POP) begin
 			if(r)
 				Y=ram_in;
 			else
 				X=ram_in;
 			state_next = `FETCH;
 			PC = PC+1;
+		end
+		if(opcode[5:1] == `RET) begin
+		  PC = ram_in+1;
+		  state_next = `FETCH;  
 		end
 		if(rdy) begin
 			case(opcode[5:1])

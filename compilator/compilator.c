@@ -37,9 +37,9 @@ const INSTR instructions[34]={
     {"DIV", 0x08, 2, 0x3F},
     {"MOD", 0x09, 2, 0x3F},
     {"AND", 0x0A, 2, 0x3F},
-    {"OR" , 0x0B, 2, 0x3F},
+    {"OR_" , 0x0B, 2, 0x3F},
     {"XOR", 0x0C, 2, 0x3F},
-    {"NOT", 0x0D, 2, 0x3F},
+    {"NOT", 0x0D, 1, 0x3F},
     {"CMP", 0x0E, 2, 0x3F},
     {"TST", 0x0F, 2, 0x3F},
     {"INC", 0x10, 1, 0x30},
@@ -145,7 +145,7 @@ void __flags(){
 for(int i=0;i<n;i++){
         char *f=strchr(c[i], ':');
         if(f != NULL){
-            char *flag_name=malloc(20);
+            char *flag_name=malloc(50);
             strncpy(flag_name, c[i], f-c[i]);
             flag_name[f-c[i]]=0;
             int flag_pos=search_flag(flag_name);
@@ -155,7 +155,7 @@ for(int i=0;i<n;i++){
                     exit(0);
                 }
                 flags[flags_len].name = flag_name;
-                flags[flags_len].addr = 2*i;
+                flags[flags_len].addr = i;
                 flags_len++;
 
             }else{
@@ -204,7 +204,7 @@ void __syntax(){
             printf("Illegal instruction on line %d: '%s'\n", i+1, c[i]);
             exit(0);
         }
-        char *in=malloc(20);
+        char *in=malloc(50);
         strncpy(in, c[i], f-c[i]);
         int instr_index=check_instr(in);
         if(instr_index == -1){
@@ -244,7 +244,7 @@ void __syntax(){
         }
         ops[i]=instr_index;
         if(num_args == 1){
-            char *arg1=malloc(20);
+            char *arg1=malloc(50);
             int j=0;
             while(1){
                 if(*a1==' ' || *a1 == ',' || *a1==0){
@@ -261,7 +261,7 @@ void __syntax(){
             }
             args[i][0]=arg1;
         }else{
-            char *arg1=malloc(20);
+            char *arg1=malloc(50);
             int j=0;
             while(1){
                 if(*a1==' ' || *a1 == ',' || *a1==0){
@@ -272,7 +272,7 @@ void __syntax(){
                 a1++;
                 j++;
             }
-            char *arg2=malloc(20);
+            char *arg2=malloc(50);
             j=0;
             while(1){
                 if(*a2==' ' || *a2 == ',' || *a2==0){
