@@ -1,6 +1,8 @@
-MOV X, 3
-MOV Y, 0x15
-add X, 1
-OUT X, 1
-OUT Y, 1
-HLT
+PSH 5
+POP X
+MOV Y, 6
+ADD X, Y
+JMP afisare
+RET
+afisare: OUT X, 1
+RET
